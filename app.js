@@ -166,7 +166,13 @@ const generateCertificate = async (member_id, name, achievement, date) => {
     stream.on("error", (error) => reject(error));
   });
 };
-
+generateCertificate(123, "Mano", "Excellence in Programming", "2023-08-05")
+  .then((filePath) => {
+    console.log(`Certificate generated: ${filePath}`);
+  })
+  .catch((error) => {
+    console.error(`Error generating certificate: ${error}`);
+  });
 /////// Get members
 
 app.get("/members", async (request, response) => {
