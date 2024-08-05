@@ -90,36 +90,73 @@ if (!fs.existsSync(certificatesDirectory)) {
 const generateCertificate = async (member_id, name, achievement, date) => {
   return new Promise((resolve, reject) => {
     // Create a new PDF document
-    const doc = new PDFDocument();
-
+    const doc = new PDFDocument({
+      size: "A4",
+      layout: "landscape",
+      margins: { top: 50, bottom: 50, left: 50, right: 50 },
+    });
+    doc.image(path.join(__dirname, "./public/background.jpeg"), 0, 0, {
+      width: doc.page.width,
+      height: doc.page.height,
+    });
     // Set up file path for the generated certificate
     const filePath = `./certificates/certificate_${member_id}_${Date.now()}.pdf`;
 
-    // Pipe PDF content to a writable stream
     const stream = fs.createWriteStream(filePath);
     doc.pipe(stream);
 
-    // Add content to the PDF document
-    doc.fontSize(16).text(`Certificate of Achievement`, { align: "center" });
+    // Load background image
+    // doc.image(path.join(__dirname, "path/to/your/certificate.jpg"), 0, 0, {
+    //   width: doc.page.width,
+    //   height: doc.page.height,
+    // });
+
+    // Add borders
+    // doc.rect(50, 50, doc.page.width - 100, doc.page.height - 100).stroke();
+
+    // Add seal image to the left
+    const sealImagePath = path.join(__dirname, "./public/logocertificate.png"); // Make sure to replace with the correct path to your seal image
+    const sealImageWidth = 80; // Adjust the width as needed
+    doc.image(
+      sealImagePath,
+      doc.page.width / 2 - 200 - sealImageWidth / 2,
+      100,
+      { width: sealImageWidth }
+    );
+
+    // Add content to the PDF document with appropriate formatting
+    doc
+      .fontSize(24)
+      .font("Helvetica-Bold")
+      .text("Certificate of Achievement", 0, 120, { align: "center" });
+
     doc.moveDown();
     doc
-      .fontSize(14)
-      .text(`This certificate is awarded to:`, { align: "center" });
-    doc
       .fontSize(18)
-      .text(`${name}`, { align: "center", underline: true })
-      .moveDown();
+      .font("Helvetica")
+      .text("Presented to", 0, 200, { align: "center" });
+
+    doc.moveDown();
+    doc.fontSize(30).font("Helvetica-Bold").text(name, { align: "center" });
+
+    doc.moveDown();
+    doc.fontSize(18).font("Helvetica").text("for", { align: "center" });
+    doc.moveDown();
     doc
-      .fontSize(14)
-      .text(`For outstanding achievement in:`, { align: "center" });
+      .fontSize(11)
+      .text("For outstanding achievement in:", { align: "center" });
+
+    doc.moveDown();
     doc
-      .fontSize(18)
-      .text(`${achievement}`, { align: "center", underline: true })
-      .moveDown();
-    doc.fontSize(14).text(`Date: ${date}`, { align: "center" }).moveDown(2);
+      .fontSize(22)
+      .font("Helvetica-Bold")
+      .text(achievement, { align: "center", underline: true });
+
+    doc.moveDown();
     doc
-      .fontSize(12)
-      .text(`Issued on behalf of the Organization....`, { align: "center" });
+      .fontSize(11)
+      .font("Helvetica")
+      .text(`Date: ${date}`, { align: "center" });
 
     // Finalize the PDF document
     doc.end();
